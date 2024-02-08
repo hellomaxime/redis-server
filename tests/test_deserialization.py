@@ -23,3 +23,7 @@ def test_echo():
 def test_get():
     input = "*2\r\n$3\r\nGET\r\n$5\r\nmykey\r\n"
     assert deserialize(input) == ["*2", "$3", "GET", "$5", "mykey"]
+
+def test_set_expiry():
+    input = "*3\r\n$3\r\nset\r\n$3\r\nkey\r\n$6\r\nmyvalue\r\n$2\r\nEX\r\n$2\r\n10"
+    assert deserialize(input) == ["*3", "$3", "set", "$3", "key", "$6", "myvalue", "$2", "EX", "$2", "10"]

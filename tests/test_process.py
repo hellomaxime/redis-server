@@ -1,3 +1,4 @@
+import time
 from utils import process, implemented_commands, redis_dict
 
 def test_ping():
@@ -43,3 +44,14 @@ def test_set_empty():
     assert process(input) == "OK"
     assert "mykeyempty" in redis_dict
     assert redis_dict["mykeyempty"] == ""
+
+def test_set_expiry():
+    input = ["*2", "$3", "SET", "$5", "mykeyexp", "$9", "myvalueexp", "$2", "EX", "$2", "2"]
+    assert process(input) == "OK"
+    assert "mykeyexp" in redis_dict
+
+def test_get_expiry():
+    input = ["*2", "$3", "GET", "$5", "mykeyexp"]
+    assert process(input) == "myvalueexp"
+    time.sleep(3)
+    assert process(input) == None

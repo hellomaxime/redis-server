@@ -33,7 +33,11 @@ def process(list_commands):
         else:
             redis_dict[list_commands[4]] = list_commands[6]
 
-        if len(list_commands) > 7:
+        if len(list_commands) >= 9:
+    
+            if len(list_commands) == 9 or not list_commands[10].isdigit():
+                return -1
+
             exp_option = list_commands[8].upper()
             if exp_option == "EX":
                 expiry_dict[list_commands[4]] = time.time() + int(list_commands[10])
@@ -44,12 +48,16 @@ def process(list_commands):
             elif exp_option == "PXAT":
                 expiry_dict[list_commands[4]] = int(list_commands[10])/1000
             else:
-                return -1
+                return -1        
 
         return "OK"
     
     elif command == "GET":
-        if list_commands[4] in redis_dict:
+        
+        if len(list_commands) == 3:
+            return -2
+
+        if len(list_commands) > 4 and list_commands[4] in redis_dict:
             if list_commands[4] in expiry_dict and expiry_dict[list_commands[4]] < time.time():
                 del expiry_dict[list_commands[4]]
                 del redis_dict[list_commands[4]]
@@ -63,6 +71,8 @@ def serialize(response):
     elif type(response) == int:
         if response == -1:
             return f"-command not implemented\r\n"
+        elif response == -2:
+            return f"-wrong number of arguments (given 0, expected 1)\r\n"
         return f":{response}\r\n"
     else:
         return "$-1\r\n"

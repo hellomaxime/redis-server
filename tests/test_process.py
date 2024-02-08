@@ -26,6 +26,10 @@ def test_set():
     assert process(input) == "OK"
     assert "mykey" in redis_dict
 
+def test_get_no_key():
+    input = ["*2", "$3", "GET"]
+    assert process(input) == -2
+
 def test_get_int():
     input = ["*2", "$3", "GET", "$5", "mykey"]
     assert process(input) == 10
@@ -55,3 +59,11 @@ def test_get_expiry():
     assert process(input) == "myvalueexp"
     time.sleep(3)
     assert process(input) == None
+
+def test_no_exp_time():
+    input = ["*2", "$3", "SET", "$5", "mykeyexp", "$9", "myvalueexp", "$2", "EX"]
+    assert process(input) == -1
+
+def test_str_exp_time():
+    input = ["*2", "$3", "SET", "$5", "mykeyexp", "$9", "myvalueexp", "$2", "EX", "$4", "TIME"]
+    assert process(input) == -1

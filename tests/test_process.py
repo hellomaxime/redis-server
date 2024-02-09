@@ -67,3 +67,22 @@ def test_no_exp_time():
 def test_str_exp_time():
     input = ["*2", "$3", "SET", "$5", "mykeyexp", "$9", "myvalueexp", "$2", "EX", "$4", "TIME"]
     assert process(input) == -1
+
+def test_exists_no_key():
+    input = ["*1", "$6", "EXISTS"]
+    assert process(input) == -3
+
+def test_exists_key():
+    redis_dict["key"] = "value"
+    input = ["*2", "$6", "EXISTS", "$3", "key"]
+    assert process(input) == 1
+
+def test_exists_keys():
+    redis_dict["key"] = "value"
+    redis_dict["key2"] = "value"
+    input = ["*3", "$6", "EXISTS", "$3", "key", "$4", "key2"]
+    assert process(input) == 2
+
+def test_not_exists():
+    input = ["*2", "$6", "EXISTS", "$3", "nokey"]
+    assert process(input) == 0

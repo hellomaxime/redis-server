@@ -1,6 +1,6 @@
 import time
 
-implemented_commands = ["PING", "ECHO", "SET", "GET"]
+implemented_commands = ["PING", "ECHO", "SET", "GET", "EXISTS"]
 
 redis_dict = {}
 expiry_dict = {}
@@ -65,14 +65,29 @@ def process(list_commands):
             return redis_dict[list_commands[4]]
         return None
 
+    elif command == "EXISTS":
+        if len(list_commands) == 3:
+            return -3
+        count = 0
+        for key in list_commands[4::2]:
+            if key in expiry_dict and expiry_dict[key] < time.time():
+                del expiry_dict[key]
+                del redis_dict[key]
+            else:
+                if key in redis_dict:
+                    count += 1
+        return count
+
 def serialize(response):
     if type(response) == str:
         return f"+{response}\r\n"
     elif type(response) == int:
         if response == -1:
-            return f"-command not implemented\r\n"
+            return "-command not implemented\r\n"
         elif response == -2:
-            return f"-wrong number of arguments (given 0, expected 1)\r\n"
+            return "-wrong number of arguments (given 0, expected 1)\r\n"
+        elif response == -3:
+            return "-ERR wrong number of arguments for 'exists' command\r\n"
         return f":{response}\r\n"
     else:
         return "$-1\r\n"

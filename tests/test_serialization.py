@@ -16,3 +16,15 @@ def test_error():
 def test_empty_str():
     input = ""
     assert serialize(input) == "+\r\n"
+
+def test_err1():
+    input = -1
+    assert serialize(input) == "-command not implemented\r\n"
+
+def test_err2():
+    input = -2
+    assert serialize(input) == "-wrong number of arguments (given 0, expected 1)\r\n"
+
+def test_err3():
+    input = -3
+    assert serialize(input) == "-ERR wrong number of arguments for 'exists' command\r\n"

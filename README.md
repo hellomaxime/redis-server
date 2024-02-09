@@ -34,3 +34,7 @@ The server was built using Python (but prefer C, Rust or Golang for performance)
 ### 4 - performance check
 - You can use redis-benchmark to check concurrency and performance
 - The redis-benchmark utility simulates running commands done by N clients while at the same time sending M total queries.
+
+### Tips
+
+I use https://try.redis.io/ to compare my lite version with Redis

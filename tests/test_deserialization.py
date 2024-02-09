@@ -16,6 +16,10 @@ def test_set_empty():
     input = "*2\r\n$3\r\nset\r\n$3\r\nkey\r\n"
     assert deserialize(input) == ["*2", "$3", "set", "$3", "key"]
 
+def test_set_no_key():
+    input = "*1\r\n$3\r\nset\r\n"
+    assert deserialize(input) == ["*1", "$3", "set"]
+
 def test_echo():
     input = "*2\r\n$4\r\nECHO\r\n$11\r\nHello World\r\n"
     assert deserialize(input) == ["*2", "$4", "ECHO", "$11", "Hello World"]
@@ -39,3 +43,15 @@ def test_exists_key():
 def test_exists_keys():
     input = "*3\r\n$6\r\nEXISTS\r\n$3\r\nkey\r\n$4\r\nkey2\r\n"
     assert deserialize(input) == ["*3", "$6", "EXISTS", "$3", "key", "$4", "key2"]
+
+def test_del_no_key():
+    input = "*1\r\n$3\r\nDEL\r\n"
+    assert deserialize(input) == ["*1", "$3", "DEL"]
+
+def test_del_key():
+    input = "*2\r\n$3\r\nDEL\r\n$3\r\nkey\r\n"
+    assert deserialize(input) == ["*2", "$3", "DEL", "$3", "key"]
+
+def test_del_keys():
+    input = "*3\r\n$3\r\nDEL\r\n$3\r\nkey\r\n$4\r\nkey2\r\n"
+    assert deserialize(input) == ["*3", "$3", "DEL", "$3", "key", "$4", "key2"]

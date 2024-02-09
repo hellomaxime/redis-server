@@ -49,6 +49,12 @@ def test_set_empty():
     assert "mykeyempty" in redis_dict
     assert redis_dict["mykeyempty"] == ""
 
+def test_set_no_key():
+    input = ["*1", "$3", "set"]
+    assert process(input) == "OK"
+    assert "" in redis_dict
+    assert redis_dict[""] == None
+
 def test_set_expiry():
     input = ["*2", "$3", "SET", "$5", "mykeyexp", "$9", "myvalueexp", "$2", "EX", "$2", "2"]
     assert process(input) == "OK"
@@ -85,4 +91,23 @@ def test_exists_keys():
 
 def test_not_exists():
     input = ["*2", "$6", "EXISTS", "$3", "nokey"]
+    assert process(input) == 0
+
+def test_del_no_key():
+    input = ["*1", "$3", "DEL"]
+    assert process(input) == -4
+
+def test_del_key():
+    redis_dict["key"] = "value"
+    input = ["*2", "$3", "DEL", "$3", "key"]
+    assert process(input) == 1
+
+def test_del_keys():
+    redis_dict["key"] = "value"
+    redis_dict["key2"] = "value"
+    input = ["*3", "$3", "DEL", "$3", "key", "$4", "key2"]
+    assert process(input) == 2
+
+def test_del_not_exists():
+    input = ["*2", "$3", "DEL", "$3", "nokey"]
     assert process(input) == 0

@@ -1,6 +1,6 @@
 import time
 
-implemented_commands = ["PING", "ECHO", "SET", "GET", "EXISTS"]
+implemented_commands = ["PING", "ECHO", "SET", "GET", "EXISTS", "DEL"]
 
 redis_dict = {}
 expiry_dict = {}
@@ -26,6 +26,10 @@ def process(list_commands):
         return list_commands[4]
     elif command == "SET":
        
+        if len(list_commands) == 3:
+            redis_dict[""] = None
+            return "OK"
+
         if len(list_commands) < 7:
             redis_dict[list_commands[4]] = ""
         elif list_commands[6].isdigit():
@@ -77,7 +81,18 @@ def process(list_commands):
                 if key in redis_dict:
                     count += 1
         return count
-
+    elif command == "DEL":
+        if len(list_commands) == 3:
+            return -4
+        count = 0
+        for key in list_commands[4::2]:
+            if key in redis_dict:
+                del redis_dict[key]
+                count += 1
+                if key in expiry_dict:
+                    del expiry_dict[key]
+        return count
+    
 def serialize(response):
     if type(response) == str:
         return f"+{response}\r\n"
@@ -88,6 +103,8 @@ def serialize(response):
             return "-wrong number of arguments (given 0, expected 1)\r\n"
         elif response == -3:
             return "-ERR wrong number of arguments for 'exists' command\r\n"
+        elif response == -4:
+            return "-ERR wrong number of arguments for 'del' command\r\n"
         return f":{response}\r\n"
     else:
         return "$-1\r\n"

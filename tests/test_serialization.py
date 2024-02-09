@@ -28,3 +28,7 @@ def test_err2():
 def test_err3():
     input = -3
     assert serialize(input) == "-ERR wrong number of arguments for 'exists' command\r\n"
+
+def test_err3():
+    input = -4
+    assert serialize(input) == "-ERR wrong number of arguments for 'del' command\r\n"

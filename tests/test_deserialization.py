@@ -55,3 +55,19 @@ def test_del_key():
 def test_del_keys():
     input = "*3\r\n$3\r\nDEL\r\n$3\r\nkey\r\n$4\r\nkey2\r\n"
     assert deserialize(input) == ["*3", "$3", "DEL", "$3", "key", "$4", "key2"]
+
+def test_incr_no_key():
+    input = "*1\r\n$4\r\nINCR\r\n"
+    assert deserialize(input) == ["*1", "$4", "INCR"]
+
+def test_incr_key():
+    input = "*2\r\n$4\r\nINCR\r\n$3\r\nkey\r\n"
+    assert deserialize(input) == ["*2", "$4", "INCR", "$3", "key"]
+
+def test_decr_no_key():
+    input = "*1\r\n$4\r\nDECR\r\n"
+    assert deserialize(input) == ["*1", "$4", "DECR"]
+
+def test_decr_key():
+    input = "*2\r\n$4\r\nDECR\r\n$3\r\nkey\r\n"
+    assert deserialize(input) == ["*2", "$4", "DECR", "$3", "key"]

@@ -11,7 +11,7 @@ def test_lower_case():
 
 def test_command_not_exist():
     input = ["*1", "$3", "ABC"]
-    assert process(input) == -1
+    assert process(input) == "-1"
 
 def test_echo():
     input = ["*2", "$4", "ECHO", "$11", "Hello World"]
@@ -28,7 +28,7 @@ def test_set():
 
 def test_get_no_key():
     input = ["*2", "$3", "GET"]
-    assert process(input) == -2
+    assert process(input) == "-2"
 
 def test_get_int():
     input = ["*2", "$3", "GET", "$5", "mykey"]
@@ -68,15 +68,15 @@ def test_get_expiry():
 
 def test_no_exp_time():
     input = ["*2", "$3", "SET", "$5", "mykeyexp", "$9", "myvalueexp", "$2", "EX"]
-    assert process(input) == -1
+    assert process(input) == "-1"
 
 def test_str_exp_time():
     input = ["*2", "$3", "SET", "$5", "mykeyexp", "$9", "myvalueexp", "$2", "EX", "$4", "TIME"]
-    assert process(input) == -1
+    assert process(input) == "-1"
 
 def test_exists_no_key():
     input = ["*1", "$6", "EXISTS"]
-    assert process(input) == -3
+    assert process(input) == "-3"
 
 def test_exists_key():
     redis_dict["key"] = "value"
@@ -95,7 +95,7 @@ def test_not_exists():
 
 def test_del_no_key():
     input = ["*1", "$3", "DEL"]
-    assert process(input) == -4
+    assert process(input) == "-4"
 
 def test_del_key():
     redis_dict["key"] = "value"
@@ -111,3 +111,37 @@ def test_del_keys():
 def test_del_not_exists():
     input = ["*2", "$3", "DEL", "$3", "nokey"]
     assert process(input) == 0
+
+def test_incr_no_key():
+    input = ["*1", "$4", "INCR"]
+    assert process(input) == "-2"
+
+def test_incr_key():
+    redis_dict["key"] = 1
+    input = ["*2", "$4", "INCR", "$3", "key"]
+    assert process(input) == 2
+
+def test_incr_exp():
+    redis_dict["key"] = 10
+    input = ["*2", "$4", "INCR", "$3", "key"]
+    assert process(input) == 11
+    del redis_dict["key"]
+    input = ["*2", "$4", "INCR", "$3", "key"]
+    assert process(input) == 1
+
+def test_decr_no_key():
+    input = ["*1", "$4", "DECR"]
+    assert process(input) == "-2"
+
+def test_decr_key():
+    redis_dict["key"] = 1
+    input = ["*2", "$4", "DECR", "$3", "key"]
+    assert process(input) == 0
+
+def test_decr_exp():
+    redis_dict["key"] = -10
+    input = ["*2", "$4", "DECR", "$3", "key"]
+    assert process(input) == -11
+    del redis_dict["key"]
+    input = ["*2", "$4", "DECR", "$3", "key"]
+    assert process(input) == -1

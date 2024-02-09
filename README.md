@@ -7,6 +7,8 @@ It aims to build a lite version of Redis with all the functionality of the first
 
 The server was built using Python (but prefer C, Rust or Golang for performance) and test-driven development approach.
 
+Run server : `python redis_server.py`  
+
 ### 1 - protocol  
 - RESP is the protocol used to communicate with a Redis server
 - Clients send commands to a Redis Server as a RESP Array of Bulk Strings

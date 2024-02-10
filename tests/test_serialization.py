@@ -29,6 +29,18 @@ def test_err3():
     input = "-3"
     assert serialize(input) == "-ERR wrong number of arguments for 'exists' command\r\n"
 
-def test_err3():
+def test_err4():
     input = "-4"
     assert serialize(input) == "-ERR wrong number of arguments for 'del' command\r\n"
+
+def test_err5():
+    input = "-5"
+    assert serialize(input) == "-ERR wrong number of arguments for 'lpush' command\r\n"
+
+def test_err6():
+    input = "-6"
+    assert serialize(input) == "-WRONGTYPE Operation against a key holding the wrong kind of value\r\n"
+
+def test_err7():
+    input = "-7"
+    assert serialize(input) == "-ERR wrong number of arguments for 'rpush' command\r\n"

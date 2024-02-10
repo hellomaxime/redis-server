@@ -1,6 +1,6 @@
 import time
 
-implemented_commands = ["PING", "ECHO", "SET", "GET", "EXISTS", "DEL", "INCR", "DECR"]
+implemented_commands = ["PING", "ECHO", "SET", "GET", "EXISTS", "DEL", "INCR", "DECR", "LPUSH", "RPUSH"]
 
 redis_dict = {}
 expiry_dict = {}
@@ -24,24 +24,19 @@ def process(list_commands):
         if len(list_commands) < 4:
             return None
         return list_commands[4]
-    elif command == "SET":
-       
+    elif command == "SET":  
         if len(list_commands) == 3:
             redis_dict[""] = None
             return "OK"
-
         if len(list_commands) < 7:
             redis_dict[list_commands[4]] = ""
         elif list_commands[6].isdigit():
             redis_dict[list_commands[4]] = int(list_commands[6])
         else:
             redis_dict[list_commands[4]] = list_commands[6]
-
-        if len(list_commands) >= 9:
-    
+        if len(list_commands) >= 9: 
             if len(list_commands) == 9 or not list_commands[10].isdigit():
                 return "-1"
-
             exp_option = list_commands[8].upper()
             if exp_option == "EX":
                 expiry_dict[list_commands[4]] = time.time() + int(list_commands[10])
@@ -53,22 +48,19 @@ def process(list_commands):
                 expiry_dict[list_commands[4]] = int(list_commands[10])/1000
             else:
                 return "-1"        
-
-        return "OK"
-    
-    elif command == "GET":
-        
+        return "OK"   
+    elif command == "GET":        
         if len(list_commands) == 3:
             return "-2"
-
         if len(list_commands) > 4 and list_commands[4] in redis_dict:
+            if type(redis_dict[list_commands[4]]) == list:
+                return "-6"
             if list_commands[4] in expiry_dict and expiry_dict[list_commands[4]] < time.time():
                 del expiry_dict[list_commands[4]]
                 del redis_dict[list_commands[4]]
                 return None
             return redis_dict[list_commands[4]]
         return None
-
     elif command == "EXISTS":
         if len(list_commands) == 3:
             return "-3"
@@ -92,7 +84,6 @@ def process(list_commands):
                 if key in expiry_dict:
                     del expiry_dict[key]
         return count
-    
     elif command == "INCR" or command == "DECR":
         if len(list_commands) == 3:
             return "-2"
@@ -111,6 +102,30 @@ def process(list_commands):
             else:
                 redis_dict[list_commands[4]] = -1
         return redis_dict[list_commands[4]]
+    elif command == "LPUSH":
+        if len(list_commands) <= 5:
+            return "-5"
+
+        if list_commands[4] in redis_dict:
+            if type(redis_dict[list_commands[4]]) == list:
+                redis_dict[list_commands[4]][:0] = list_commands[-1:5:-2]
+            else:
+                return "-6"
+        else:
+            redis_dict[list_commands[4]] = list_commands[-1:5:-2]
+        return len(redis_dict[list_commands[4]])
+    elif command == "RPUSH":
+        if len(list_commands) <= 5:
+            return "-7"
+
+        if list_commands[4] in redis_dict:
+            if type(redis_dict[list_commands[4]]) == list:
+                redis_dict[list_commands[4]].extend(list_commands[6::2])
+            else:
+                return "-6"
+        else:
+            redis_dict[list_commands[4]] = list_commands[6::2]
+        return len(redis_dict[list_commands[4]])
 
 def serialize(response):
     if type(response) == str:
@@ -122,6 +137,12 @@ def serialize(response):
             return "-ERR wrong number of arguments for 'exists' command\r\n"
         elif response == "-4":
             return "-ERR wrong number of arguments for 'del' command\r\n"
+        elif response == "-5":
+            return "-ERR wrong number of arguments for 'lpush' command\r\n"
+        elif response == "-6":
+            return "-WRONGTYPE Operation against a key holding the wrong kind of value\r\n"
+        elif response == "-7":
+            return "-ERR wrong number of arguments for 'rpush' command\r\n"
         return f"+{response}\r\n"
     elif type(response) == int:
         return f":{response}\r\n"

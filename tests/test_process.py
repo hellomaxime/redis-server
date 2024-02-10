@@ -31,6 +31,11 @@ def test_get_no_key():
     assert process(input) == "-2"
 
 def test_get_int():
+    redis_dict["mylist"] = []
+    input = ["*2", "$3", "GET", "$5", "mylist"]
+    assert process(input) == "-6"
+
+def test_get_list():
     input = ["*2", "$3", "GET", "$5", "mykey"]
     assert process(input) == 10
 
@@ -145,3 +150,30 @@ def test_decr_exp():
     del redis_dict["key"]
     input = ["*2", "$4", "DECR", "$3", "key"]
     assert process(input) == -1
+
+def test_lpush_no_key():
+    input = ["*1", "$5", "LPUSH"]
+    assert process(input) == "-5"
+
+def test_lpush_key_no_value():
+    input = ["*2", "$5", "LPUSH", "$3", "key"]
+    assert process(input) == "-5"
+
+def test_lpush_value():
+    input = ["*3", "$5", "LPUSH", "$3", "keynew", "$1", "1"]
+    assert process(input) == 1
+
+def test_lpush_values():
+    input = ["*5", "$5", "LPUSH", "$3", "key2", "$1", "1", "$1", "2", "$1", "3"]
+    assert process(input) == 3
+    assert redis_dict["key2"] == ["3", "2", "1"]
+
+def test_lpush_wrong_type():
+    redis_dict["keywrong"] = 1
+    input = ["*3", "$5", "LPUSH", "$8", "keywrong", "$1", "1"]
+    assert process(input) == "-6"
+
+def test_rpush_values():
+    input = ["*7", "$5", "RPUSH", "$3", "keyright", "$1", "1", "$1", "2", "$1", "3", "$1", "4", "$1", "5"]
+    assert process(input) == 5
+    assert redis_dict["keyright"] == ["1", "2", "3", "4", "5"]

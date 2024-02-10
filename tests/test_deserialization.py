@@ -1,4 +1,4 @@
-from utils import deserialize
+from utils import deserialize, redis_dict
 
 def test_nil():
     input = "$-1\r\n"
@@ -71,3 +71,23 @@ def test_decr_no_key():
 def test_decr_key():
     input = "*2\r\n$4\r\nDECR\r\n$3\r\nkey\r\n"
     assert deserialize(input) == ["*2", "$4", "DECR", "$3", "key"]
+
+def test_lpush_no_key():
+    input = "*1\r\n$5\r\nLPUSH\r\n"
+    assert deserialize(input) == ["*1", "$5", "LPUSH"]
+
+def test_lpush_key_no_value():
+    input = "*2\r\n$5\r\nLPUSH\r\n$3\r\nkey\r\n"
+    assert deserialize(input) == ["*2", "$5", "LPUSH", "$3", "key"]
+
+def test_lpush_value():
+    input = "*3\r\n$5\r\nLPUSH\r\n$3\r\nkey\r\n$1\r\n1\r\n"
+    assert deserialize(input) == ["*3", "$5", "LPUSH", "$3", "key", "$1", "1"]
+
+def test_lpush_values():
+    input = "*5\r\n$5\r\nLPUSH\r\n$4\r\nkey2\r\n$1\r\n1\r\n$1\r\n2\r\n$1\r\n3\r\n"
+    assert deserialize(input) == ["*5", "$5", "LPUSH", "$4", "key2", "$1", "1", "$1", "2", "$1", "3"]
+
+def test_rpush_values():
+    input = "*5\r\n$5\r\nRPUSH\r\n$4\r\nkey2\r\n$1\r\n1\r\n$1\r\n2\r\n$1\r\n3\r\n"
+    assert deserialize(input) == ["*5", "$5", "RPUSH", "$4", "key2", "$1", "1", "$1", "2", "$1", "3"]

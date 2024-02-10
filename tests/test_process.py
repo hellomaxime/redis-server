@@ -1,5 +1,6 @@
 import time
-from utils import process, implemented_commands, redis_dict
+import os
+from utils import process, redis_dict
 
 def test_ping():
     input = ["*1", "$4", "PING"]
@@ -177,3 +178,11 @@ def test_rpush_values():
     input = ["*7", "$5", "RPUSH", "$3", "keyright", "$1", "1", "$1", "2", "$1", "3", "$1", "4", "$1", "5"]
     assert process(input) == 5
     assert redis_dict["keyright"] == ["1", "2", "3", "4", "5"]
+
+def test_save():
+    if os.path.exists("redis_dict.json"):
+        os.remove("redis_dict.json")
+    input = ["*1", "$4", "SAVE"]
+    assert process(input) == "OK"
+    assert os.path.exists("redis_dict.json")
+    os.remove("redis_dict.json")

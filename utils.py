@@ -1,8 +1,15 @@
 import time
+import json
+import os
 
-implemented_commands = ["PING", "ECHO", "SET", "GET", "EXISTS", "DEL", "INCR", "DECR", "LPUSH", "RPUSH"]
+implemented_commands = ["PING", "ECHO", "SET", "GET", "EXISTS", "DEL", "INCR", "DECR", "LPUSH", "RPUSH", "SAVE"]
 
-redis_dict = {}
+if os.path.exists("redis_dict.json"):
+    with open("redis_dict.json", "r") as file:
+        redis_dict = json.load(file)
+else:
+    redis_dict = {}
+
 expiry_dict = {}
 
 def deserialize(data):
@@ -105,7 +112,6 @@ def process(list_commands):
     elif command == "LPUSH":
         if len(list_commands) <= 5:
             return "-5"
-
         if list_commands[4] in redis_dict:
             if type(redis_dict[list_commands[4]]) == list:
                 redis_dict[list_commands[4]][:0] = list_commands[-1:5:-2]
@@ -117,7 +123,6 @@ def process(list_commands):
     elif command == "RPUSH":
         if len(list_commands) <= 5:
             return "-7"
-
         if list_commands[4] in redis_dict:
             if type(redis_dict[list_commands[4]]) == list:
                 redis_dict[list_commands[4]].extend(list_commands[6::2])
@@ -126,6 +131,10 @@ def process(list_commands):
         else:
             redis_dict[list_commands[4]] = list_commands[6::2]
         return len(redis_dict[list_commands[4]])
+    elif command == "SAVE":
+        with open("redis_dict.json", "w") as file:
+            json.dump(redis_dict, file)
+        return "OK"
 
 def serialize(response):
     if type(response) == str:
